@@ -105,6 +105,7 @@ export function applyZaiProviderConfig(
     buildZaiModelDefinition({ id: "glm-4.7-flash" }),
     buildZaiModelDefinition({ id: "glm-4.7-flashx" }),
   ];
+  const glmCodingExcludeModels = new Set(["glm-4.5-flash", "glm-4.7-flash", "glm-4.7-flashx"]);
 
   const mergedModels = [...existingModels];
   const seen = new Set(existingModels.map((m) => m.id));
@@ -112,6 +113,18 @@ export function applyZaiProviderConfig(
     if (!seen.has(model.id)) {
       mergedModels.push(model);
       seen.add(model.id);
+    }
+  }
+
+  const isCodingEndpoint = params?.endpoint === "coding-cn" || params?.endpoint === "coding-global";
+
+  // Filter out flash models from merged models if using coding endpoint
+  if (isCodingEndpoint) {
+    for (let i = mergedModels.length - 1; i >= 0; i--) {
+      const model = mergedModels[i];
+      if (glmCodingExcludeModels.has(model.id)) {
+        mergedModels.splice(i, 1);
+      }
     }
   }
 

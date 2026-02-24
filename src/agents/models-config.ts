@@ -138,7 +138,12 @@ export async function ensureOpenClawModelsJson(
         string,
         NonNullable<ModelsConfig["providers"]>[string]
       >;
-      mergedProviders = { ...existingProviders, ...providers };
+      // For zai provider, prefer the new filtered configuration over existing
+      const merged = { ...existingProviders, ...providers };
+      if (providers.zai && existingProviders.zai) {
+        merged.zai = providers.zai; // Use the new filtered zai config
+      }
+      mergedProviders = merged;
     }
   }
 

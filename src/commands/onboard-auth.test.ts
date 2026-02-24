@@ -480,6 +480,48 @@ describe("applyZaiConfig", () => {
       expect(resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model)).toBe(`zai/${modelId}`);
     }
   });
+
+  it("filters models for coding-global endpoint to only allowed models", () => {
+    const cfg = applyZaiConfig({}, { endpoint: "coding-global", modelId: "glm-5" });
+    const ids = cfg.models?.providers?.zai?.models?.map((m) => m.id);
+
+    expect(ids).toContain("glm-5");
+    expect(ids).toContain("glm-4.7");
+
+    expect(ids).not.toContain("glm-4.7-flash");
+    expect(ids).not.toContain("glm-4.7-flashx");
+  });
+
+  it("filters models for coding-cn endpoint to only allowed models", () => {
+    const cfg = applyZaiConfig({}, { endpoint: "coding-cn", modelId: "glm-4.7" });
+    const ids = cfg.models?.providers?.zai?.models?.map((m) => m.id);
+
+    expect(ids).toContain("glm-5");
+    expect(ids).toContain("glm-4.7");
+
+    expect(ids).not.toContain("glm-4.7-flash");
+    expect(ids).not.toContain("glm-4.7-flashx");
+  });
+
+  it("does not filter models for non-coding endpoints", () => {
+    const cfg = applyZaiConfig({}, { endpoint: "global", modelId: "glm-5" });
+    const ids = cfg.models?.providers?.zai?.models?.map((m) => m.id);
+
+    expect(ids).toContain("glm-5");
+    expect(ids).toContain("glm-4.7");
+    expect(ids).toContain("glm-4.7-flash");
+    expect(ids).toContain("glm-4.7-flashx");
+  });
+
+  it("does not filter models for cn endpoint", () => {
+    const cfg = applyZaiConfig({}, { endpoint: "cn", modelId: "glm-5" });
+    const ids = cfg.models?.providers?.zai?.models?.map((m) => m.id);
+
+    expect(ids).toContain("glm-5");
+    expect(ids).toContain("glm-4.7");
+    expect(ids).toContain("glm-4.7-flash");
+    expect(ids).toContain("glm-4.7-flashx");
+  });
 });
 
 describe("applySyntheticConfig", () => {
